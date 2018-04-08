@@ -1,0 +1,13 @@
+### Py related files
+
+# Byte-compiled
+__pycache__/
+*.py[cod]
+
+## Vim
+*~
+.*.sw?
+## Core dumps
+core
+
+
