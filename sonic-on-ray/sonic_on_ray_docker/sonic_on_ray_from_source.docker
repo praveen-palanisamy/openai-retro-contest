@@ -1,0 +1,64 @@
+FROM openai/retro-agent:tensorflow
+
+# For ray base-deps
+RUN apt-get update \
+    && apt-get install -y \
+        git \
+        wget \
+        cmake \
+        pkg-config \
+        build-essential \
+        autoconf \
+        curl \
+        libtool \
+        unzip \
+        flex \
+        bison \
+    && apt-get clean \
+    && echo 'export PATH=/opt/conda/bin:$PATH' > /etc/profile.d/conda.sh \
+    && wget \
+        --quiet 'https://repo.continuum.io/archive/Anaconda2-4.2.0-Linux-x86_64.sh' \
+        -O /tmp/anaconda.sh \
+    && /bin/bash /tmp/anaconda.sh -b -p /opt/conda \
+    && rm /tmp/anaconda.sh \
+    && /opt/conda/bin/conda install -y \
+        libgcc \
+    && /opt/conda/bin/conda clean -y --all \
+    && /opt/conda/bin/pip install \
+        flatbuffers
+
+ENV PATH "/opt/conda/bin:$PATH"
+
+# Build the current Ray source
+RUN git clone https://github.com/ray-project/ray.git && \
+    cd ray && \
+    git rev-parse HEAD > ./docker/deploy/git-rev && \
+    git archive -o ./docker/deploy/ray.tar $(git rev-parse HEAD)
+# Deploy ray
+#ADD ray.tar /ray
+#ADD git-rev /ray/git-rev
+WORKDIR ./ray/python
+RUN pip install -e .
+WORKDIR /root/compo
+
+# Needed for OpenCV.
+RUN apt-get update && \
+    apt-get install -y libgtk2.0-dev python3-dev && \
+    rm -rf /var/lib/apt/lists/*
+
+RUN #. ~/venv/bin/activate && \
+    #pip install ray opencv-python scipy && \
+    pip install opencv-python scipy && \
+    pip3 install cmake && \
+    git clone --recursive https://github.com/openai/retro.git gym-retro && \
+    cd gym-retro && \
+    pip3 install -e . && \
+    cd ..   && \
+    git clone --recursive https://github.com/openai/retro-contest.git && \
+    pip install -e "retro-contest/support[docker]"
+
+ADD sonic_on_ray .
+ADD checkpoints ./checkpoints
+ADD retro_train_ppo.py ./agent.py
+
+CMD ["python", "-u", "./agent.py", "--load-checkpoint", "./checkpoints/checkpoint-max", "--local", "True"] 

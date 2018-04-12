@@ -1,0 +1,28 @@
+FROM openai/retro-agent:tensorflow
+
+# Needed for OpenCV, ray.; Atari-py requires zlib
+RUN apt-get update && \
+    apt-get install -y libgtk2.0-dev python3-dev zlib1g-dev libsnappy-dev && \
+    rm -rf /var/lib/apt/lists/*
+
+RUN . ~/venv/bin/activate && \
+    pip install ray opencv-python scipy cmake && \
+    pip install 'ray[rllib]' && \
+    #pip3 install cmake && \
+    git clone --recursive https://github.com/openai/retro.git gym-retro && \
+    cd gym-retro && \
+    pip3 install -e . && \
+    cd ..   && \
+    git clone --recursive https://github.com/openai/retro-contest.git && \
+    pip install -e "retro-contest/support[docker]" && \
+    pip install tf-nightly-gpu
+
+ADD sonic_on_ray .
+ADD checkpoints ./checkpoints
+ADD retro_train_ppo.py ./agent.py
+
+# Increase /dev/shm 's size
+#RUN echo "tmpfs /dev/shm tmpfs defaults,size=64g 0 0" >> /etc/fstab
+#RUN mount -o remount /dev/shm
+
+CMD ["python", "-u", "./agent.py", "--load-checkpoint", "./checkpoints/checkpoint-max", "--local", "True"] 
