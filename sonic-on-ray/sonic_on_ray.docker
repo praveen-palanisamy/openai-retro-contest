@@ -1,0 +1,15 @@
+FROM openai/retro-agent:tensorflow
+
+# Needed for OpenCV.
+RUN apt-get update && \
+    apt-get install -y libgtk2.0-dev python3-dev && \
+    rm -rf /var/lib/apt/lists/*
+
+RUN . ~/venv/bin/activate && \
+    pip install ray opencv-python scipy
+
+ADD sonic_on_ray .
+ADD checkpoints ./checkpoints
+ADD retro_train_ppo.py ./agent.py
+
+CMD ["python", "-u", "/root/compo/agent.py", "--load-checkpoint", "/root/compo/checkpoints/checkpoint-max"] 
