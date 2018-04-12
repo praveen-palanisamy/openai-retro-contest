@@ -83,9 +83,9 @@ def main():
     game = 'SonicTheHedgehog-Genesis'
     state = 'LabyrinthZone.Act1'
     env = make(game=game, state=state, record='.')
-    summary_output = open("summary" + game + state +
-                          str(datetime.now()).replace(" ", "") + ".csv")
-    summary_output.write("episode_num, reward, num_steps")
+    summary_output = open("summary_" + game + state +
+                          str(datetime.now()).replace(" ", "") + ".csv", 'w')
+    summary_output.write("episode_num, reward, num_steps\n")
     total_reward = 0.0
     num_steps = 0
     episode_num = 0
@@ -99,7 +99,7 @@ def main():
         env.render()
         if done:
             obs = env.reset()
-            summary_data = str(episode_num) + ',' + str(reward) + ',' + \
+            summary_data = str(episode_num) + ',' + str(total_reward) + ',' + \
                                          str(num_steps)
             summary_output.write(summary_data + "\n")
             total_reward = 0.0
