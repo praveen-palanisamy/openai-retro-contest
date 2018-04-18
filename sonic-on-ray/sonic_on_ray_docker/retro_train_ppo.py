@@ -22,8 +22,8 @@ def main():
     # Note that the hyperparameters have been tuned for sonic, which can be used
 
     if args.local:
-        game = 'Airstriker-Genesis'  #'SonicTheHedgehog-Genesis'
-        state = 'Level1'  #'GreenHillZone.Act1'
+        game = 'SonicTheHedgehog-Genesis'
+        state = 'GreenHillZone.Act1'
         register_env(env_name, lambda config: sonic_on_ray.make_local(game, state))
 
     else:
