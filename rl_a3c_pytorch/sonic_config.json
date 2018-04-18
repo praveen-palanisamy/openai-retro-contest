@@ -1,0 +1,29 @@
+{
+  "Spaces":{
+    "observation_channels": 1,
+    "action_shape": 7
+  },
+  "Default":{
+    "game": "SonicTheHedgehog-Genesis",
+    "level": "GreenHillZone.Act1"
+
+  },
+  "Test": {
+    "game": "SonicTheHedgehog-Genesis",
+    "level": "ScrapBrainZone.Act2"
+  },
+  "Train": {
+    "0": {
+      "game": "SonicTheHedgehog-Genesis",
+      "level": "MarbleZone.Act1"
+    },
+    "1": {
+      "game": "SonicTheHedgehog-Genesis",
+      "level": "MarbleZone.Act2"
+    },
+    "2": {
+      "game": "SonicTheHedgehog-Genesis",
+      "level": "MarbleZone.Act3"
+    }
+  }
+}

@@ -1,0 +1,9 @@
+*~
+.DS_Store
+.idea
+*.sw?
+logs
+!logs/.keep
+trained_models
+!trained_models/.keep
+
