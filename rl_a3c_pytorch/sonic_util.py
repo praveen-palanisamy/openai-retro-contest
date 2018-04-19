@@ -5,7 +5,7 @@ Environments and wrappers for Sonic training.
 import gym
 import numpy as np
 
-from baselines.common.atari_wrappers import WarpFrame, FrameStack
+#from baselines.common.atari_wrappers import WarpFrame, FrameStack
 import gym_remote.client as grc
 
 import retro
@@ -21,9 +21,12 @@ def make_env(stack=True, scale_rew=True):
     env = SonicDiscretizer(env)
     if scale_rew:
         env = RewardScaler(env)
-    env = WarpFrame(env)
-    if stack:
-        env = FrameStack(env, 4)
+    #env = WarpFrame(env)
+    # Disabling FrameStack because it currently uses a different Box. (Box(0,255,w,h) compared to Box(0,1,w,h)
+    #if stack:
+    #    env = FrameStack(env, 4)
+    env = CustomWarpFrame(env)
+    env = NormalizedEnv(env)
     return env
 
 

@@ -4,13 +4,12 @@ os.environ["OMP_NUM_THREADS"] = "1"
 import argparse
 import torch
 import torch.multiprocessing as mp
-from environment import atari_env
 from utils import read_config
 from model import A3Clstm
 from train import train
 from test import test
 from shared_optim import SharedRMSprop, SharedAdam
-#from gym.configuration import undo_logger_setup
+
 import time
 import random
 import gym
@@ -56,9 +55,9 @@ parser.add_argument(
 parser.add_argument(
     '--max-episode-length',
     type=int,
-    default=4500,
+    default=15000,
     metavar='M',
-    help='maximum length of an episode (default: 4500)')
+    help='maximum length of an episode (default: 15000)')
 parser.add_argument(
     '--env',
     default='Sonic',
@@ -78,7 +77,7 @@ parser.add_argument(
     '--load',
     default=False,
     metavar='L',
-    help='load a trained model')
+    help='load a trained model. True/False')
 parser.add_argument(
     '--save-max',
     default=True,
@@ -91,7 +90,7 @@ parser.add_argument(
     help='shares optimizer choice of Adam or RMSprop')
 parser.add_argument(
     '--count-lives',
-    default=False,
+    default=True,
     metavar='CL',
     help='end of life is end of training episode.')
 parser.add_argument(
@@ -123,9 +122,9 @@ parser.add_argument(
 parser.add_argument(
     '--skip-rate',
     type=int,
-    default=4,
+    default=0,
     metavar='SR',
-    help='frame skip rate (default: 4)')
+    help='frame skip rate (default: 0)')
 
 # Based on
 # https://github.com/pytorch/examples/tree/master/mnist_hogwild
@@ -142,12 +141,7 @@ if __name__ == '__main__':
         torch.cuda.manual_seed(args.seed)
         mp.set_start_method('spawn')
     setup_json = read_config(args.env_config)
-    if args.env == "Sonic":
-        env_conf = setup_json["Default"]
-    else:
-        for i in setup_json.keys():
-            if i in args.env:
-                env_conf = setup_json[i]
+
     obs_shape = setup_json["Spaces"]["observation_channels"]
     action_space = gym.spaces.Discrete(setup_json["Spaces"]["action_shape"])
     shared_model = A3Clstm(obs_shape, action_space)
@@ -172,8 +166,9 @@ if __name__ == '__main__':
     train_env_confs = setup_json["Train"]
     train_env_confs = {int(k):v for k,v in train_env_confs.items()}
     test_env_confs = setup_json["Test"]
-    # test_env_confs = {int(k):v for k,v in test_env_confs.items()}
-    p = mp.Process(target=test, args=(args, shared_model, test_env_confs))
+    test_env_confs = {int(k):v for k,v in test_env_confs.items()}
+
+    p = mp.Process(target=test, args=(args, shared_model, random.choice(test_env_confs)))
     p.start()
     processes.append(p)
     time.sleep(0.1)

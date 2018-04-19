@@ -2,7 +2,6 @@ from __future__ import division
 from setproctitle import setproctitle as ptitle
 import torch
 import torch.optim as optim
-from environment import atari_env
 from utils import ensure_shared_grads
 from model import A3Clstm
 from player_util import Agent

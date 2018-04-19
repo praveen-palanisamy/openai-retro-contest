@@ -3,7 +3,6 @@ import os
 os.environ["OMP_NUM_THREADS"] = "1"
 import argparse
 import torch
-from environment import atari_env
 from utils import read_config, setup_logger
 from model import A3Clstm
 from player_util import Agent
@@ -143,15 +142,7 @@ for i_episode in range(args.num_episodes):
         player.action_test()
         reward_sum += player.reward
 
-        # ugly hack need to clean this up
-        if player.done and player.info['ale.lives'] > 0 and not player.max_length:
-            state = player.env.reset()
-            player.eps_len += 2
-            player.state = torch.from_numpy(state).float()
-            if gpu_id >= 0:
-                with torch.cuda.device(gpu_id):
-                    player.state = player.state.cuda()
-        elif player.done or player.max_length:
+        if player.done or player.max_length:
             num_tests += 1
             reward_total_sum += reward_sum
             reward_mean = reward_total_sum / num_tests
