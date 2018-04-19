@@ -54,7 +54,25 @@ The `sonic-on-ray` folder was inherited from `openai/sonic-on-ray` project. The 
 
 The `retro_train_ppo.py` also takes the `--save-dir` and `--load-checkpoint` arguments to save to and load from checkpoints.
 
-###3. Tips & Tricks & Issue resolution 
+- #### GA3C Pytorch
+
+`experiments/rl_a3c_pytorch`
+
+GPU Accelerated A3C implementation in Pytorch
+
+`sudo docker build -f Dockerfile -t local/retro_ga3c_pytorch:v1 .`
+
+```bash
+sudo docker run --runtime nvidia  -v `pwd`/trained_models:/root/compo/trained_models -v `pwd`/tmp:/root/compo/logs  local/retro_ga3c_pytorch:v1
+```
+
+
+
+### 3. Utilities
+
+- `utils/generate_train_test_conf.py` : Generates a `sonic_config.json` file from `sonic-train.csv` and `sonic-validation.csv`. This facilitates random/ordered/curriculum-based training scripts.
+
+###4. Tips & Tricks & Issue resolution 
 
  1.  **Issue:**`RuntimeError: Cannot create multiple emulator instances per process`. This makes it difficult to shuffle the environment/levels for each episode i.e  run episodes from different game levels (Without running one environment instance per actor on separate processes)
 
