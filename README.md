@@ -56,7 +56,7 @@ The `retro_train_ppo.py` also takes the `--save-dir` and `--load-checkpoint` arg
 
 - #### GA3C Pytorch
 
-`experiments/rl_a3c_pytorch`
+`experiments/ga3c_pytorch`
 
 GPU Accelerated A3C implementation in Pytorch
 
@@ -74,9 +74,17 @@ sudo docker run --runtime nvidia  -v `pwd`/trained_models:/root/compo/trained_mo
 
 ###4. Tips & Tricks & Issue resolution 
 
- 1.  **Issue:**`RuntimeError: Cannot create multiple emulator instances per process`. This makes it difficult to shuffle the environment/levels for each episode i.e  run episodes from different game levels (Without running one environment instance per actor on separate processes)
+ 1. **Issue:**`RuntimeError: Cannot create multiple emulator instances per process`. This makes it difficult to shuffle the environment/levels for each episode i.e  run episodes from different game levels (Without running one environment instance per actor on separate processes)
 
     **Reason**: Occurs when you use `retro_contest` for `make`ing the environment.  Both`retro_contest.make(...)` and `retro_contest.local.make(...`) only allows instantiation of one environment. It does not seems to be a restriction imposed for the contest. The current implementation of OpenAI gym-retro does not support this. Therefor, even `retro.make(...)` can launch only one emulator instance per process.
 
     **Resolution:** One way to overcome this issue is to spawn a new process using multiprocessing to instantiate/make a new environment. I used @processify
+
+2. Don't forget to pass `scenario='contest'` when you are running the gym retro environment locally when training for the contest!
+  ```python
+  import retro
+  env = retro.make(game='SonicTheHedgehog-Genesis',     level='GreenHillZone.Act1', scenario='contest')
+  ```
+  Setting `scenari='contest'` while making the environment will create the environment with the json configuration that is used for the retro-contest and will provide a reward for change in `x`. Some of the environment wrappers (eg.: AllowBacktracking) are written assuming such a reward from the environment. If the `scenario='contest'` is left out, the reward from the environment will be same as the game's score.
+
 
