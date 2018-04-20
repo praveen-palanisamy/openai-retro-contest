@@ -10,4 +10,11 @@ __pycache__/
 ## Core dumps
 core
 
+##
+.idea
+
+#
+*.tar.gz
+*.zip
+
 
