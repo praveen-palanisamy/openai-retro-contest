@@ -20,8 +20,8 @@ RUN . ~/venv/bin/activate && \
 ADD sonic_on_ray .
 ADD checkpoints ./checkpoints
 ADD retro_train_ppo.py ./agent.py
-COPY Sonic.tar.gz .
 
+COPY Sonic.tar.gz .
 RUN tar -xzf Sonic.tar.gz -C  /root/compo/gym-retro/data/ && \
     rm Sonic.tar.gz
 
