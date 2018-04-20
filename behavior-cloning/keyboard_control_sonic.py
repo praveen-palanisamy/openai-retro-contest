@@ -4,8 +4,26 @@ from retro import make
 from pynput.keyboard import Listener,Key
 import numpy as np
 from datetime import datetime
+import argparse
+
+args = argparse.ArgumentParser(description="Keyboard control Sonic")
+args.add_argument(
+    "--game",
+    type=str,
+    metavar="G",
+    default="SonicTheHedgehog-Genesis"
+)
+args.add_argument(
+    "--level",
+    type=str,
+    metavar="L",
+    default="GreenHillZone.Act1"
+)
+args = args.parse_args()
 
 keys_pressed = set()
+
+
 class GenesisKeyboard:
     def __init__(self, *keys):
         global keys_pressed
@@ -80,9 +98,9 @@ def get_action():
 
 def main():
     btn = GenesisKeyboard(Key.left, Key.right, Key.down, Key.shift)
-    game = 'SonicTheHedgehog-Genesis'
-    state = 'LabyrinthZone.Act1'
-    env = make(game=game, state=state, record='.')
+    game = args.game
+    state = args.level
+    env = make(game=game, state=state, record='.', scenario='contest')
     summary_output = open("summary_" + game + state +
                           str(datetime.now()).replace(" ", "") + ".csv", 'w')
     summary_output.write("episode_num, reward, num_steps\n")
@@ -96,6 +114,8 @@ def main():
         obs, reward, done, info = env.step(action)
         total_reward += reward
         num_steps += 1
+        print("Ep#:{}\tstep:{}\treward:{}\t total_rew={}".format(episode_num,
+                                                                 num_steps, reward, total_reward))
         env.render()
         if done:
             obs = env.reset()

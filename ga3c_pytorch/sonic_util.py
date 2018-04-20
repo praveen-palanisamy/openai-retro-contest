@@ -34,7 +34,7 @@ def make_local_env(game, state, stack=True, scale_rew=True):
     """
     Create an instance of a local Gym environment with some standard wrappers
     """
-    env = retro.make(game=game, state=state)
+    env = retro.make(game=game, state=state, scenario='contest')
     env = SonicDiscretizer(env)
     if scale_rew:
         env = RewardScaler(env)
