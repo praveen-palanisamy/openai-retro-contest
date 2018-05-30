@@ -61,8 +61,11 @@ def main():
 
     if args.num_processes > 1:
         if args.retro_contest == True:
-            envs = SubprocVecSonicEnv({'game': 'SonicTheHedgehog-Genesis', 'state':'LabyrinthZone.Act1',
-                                       'num_envs': args.num_processes})
+            import json
+            sonic_env_confs = json.load(open(args.sonic_config_file,'r'))
+            sonic_env_confs = sonic_env_confs['Train']
+            sonic_env_confs = [v for _,v in sonic_env_confs.items()]
+            envs = SubprocVecSonicEnv(sonic_env_confs, args.num_processes)
         else:
             envs = [make_env(args.env_name, args.seed, i, args.log_dir, args.add_timestep)
                 for i in range(args.num_processes)]
@@ -77,12 +80,12 @@ def main():
 
     obs_shape = envs.observation_space.shape
     obs_shape = (obs_shape[0] * args.num_stack, *obs_shape[1:])
-
+    prev_saved_rew_mean = float('-inf')
     actor_critic = Policy(obs_shape, envs.action_space, args.recurrent_policy)
     if args.load_model:
         model_path = os.path.join(args.save_dir, args.algo, args.env_name) + ".pt"
-        actor_critic, ob_rms = torch.load(model_path)
-        print("Loaded actor_critic model from", model_path)
+        actor_critic, ob_rms, prev_saved_rew_mean = torch.load(model_path)
+        print("Loaded actor_critic model from:", model_path, "which got a mean score of:", prev_saved_rew_mean)
     
     if envs.action_space.__class__.__name__ == "Discrete":
         action_shape = 1
@@ -173,7 +176,7 @@ def main():
         
         rollouts.after_update()
 
-        if j % args.save_interval == 0 and args.save_dir != "":
+        if j % args.save_interval == 0 and final_rewards.mean() > prev_saved_rew_mean and args.save_dir != "":
             save_path = os.path.join(args.save_dir, args.algo)
             try:
                 os.makedirs(save_path)
@@ -186,9 +189,11 @@ def main():
                 save_model = copy.deepcopy(actor_critic).cpu()
 
             save_model = [save_model,
-                            hasattr(envs, 'ob_rms') and envs.ob_rms or None]
+                            hasattr(envs, 'ob_rms') and envs.ob_rms or None,
+                          final_rewards.mean()]
 
             torch.save(save_model, os.path.join(save_path, args.env_name + ".pt"))
+            prev_saved_rew_mean = final_rewards.mean()
 
         if j % args.log_interval == 0:
             end = time.time()
