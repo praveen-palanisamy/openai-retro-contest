@@ -65,8 +65,10 @@ def get_args():
                         help='port to run the server on (default: 8097)')
     parser.add_argument('--retro-contest', action='store_true', default=False,
                         help='Use Gym retro evironments and retro contest related rewards')
-    parser.add_argument('--load-model', action='store_true', default=True,
+    parser.add_argument('--load-model', action='store_true', default=False,
                         help='Load trained model and resume training')
+    parser.add_argument('--sonic-config-file', default='sonic_config.json',
+                        help='Sonic env config file with the train and test set of game & levels')
     args = parser.parse_args()
 
     args.cuda = not args.no_cuda and torch.cuda.is_available()
