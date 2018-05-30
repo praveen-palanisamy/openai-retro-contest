@@ -4,6 +4,7 @@ Environments and wrappers for Sonic training.
 
 import gym
 import numpy as np
+import random
 
 #from baselines.common.atari_wrappers import WarpFrame, FrameStack
 #import gym_remote.client as grc
@@ -60,8 +61,8 @@ def make_env_in_sep_proc(game, state, shared_pipe, parent_pipe, stack=False, sca
 
     env = retro.make(game=game, state=state, scenario='contest')
     env = SonicDiscretizer(env)
-    #if scale_rew:
-    #    env = RewardScaler(env)
+    if scale_rew:
+        env = RewardScaler(env)
     env = CustomWarpFrame(env)
     env = NormalizedEnv(env)
     env = AllowBacktracking(env)
@@ -163,16 +164,21 @@ class VecEnv(ABC):
             return self
 
 class SubprocVecSonicEnv(VecEnv):
-    def __init__(self, env_conf, spaces=None):
+    def __init__(self, env_confs, num_envs, spaces=None):
         """
-        envs: list of gym environments to run in subprocesses
+        envs: list of Sonic environments to run in subprocesses
         """
         self.waiting = False
         self.closed = False
-        nenvs = env_conf['num_envs']
+        nenvs = num_envs
         self.remotes, self.work_remotes = zip(*[Pipe() for _ in range(nenvs)])
-        self.ps = [Process(target=make_env_in_sep_proc, args=(env_conf['game'], env_conf['state'], work_remote, remote ))
-            for (work_remote, remote) in zip(self.work_remotes, self.remotes)]
+        self.ps = []
+        for (worker_conn, parent_conn) in zip(self.work_remotes, self.remotes):
+            env_conf = random.sample(env_confs, 1)[0]
+            self.ps.append(Process(target=make_env_in_sep_proc, args=(env_conf['game'],
+                                                                      env_conf['level'],
+                                                                      worker_conn,
+                                                                      parent_conn)))
         for p in self.ps:
             p.daemon = True # if the main process crashes, we should not cause things to hang
             p.start()
@@ -182,7 +188,7 @@ class SubprocVecSonicEnv(VecEnv):
 
         self.remotes[0].send(('get_spaces', None))
         observation_space, action_space = self.remotes[0].recv()
-        VecEnv.__init__(self, env_conf['num_envs'], observation_space, action_space)
+        VecEnv.__init__(self, num_envs, observation_space, action_space)
 
     def step_async(self, actions):
         for remote, action in zip(self.remotes, actions):
@@ -223,7 +229,7 @@ class CustomWarpFrame(gym.ObservationWrapper):
         gym.ObservationWrapper.__init__(self, env)
         self.width = 84
         self.height = 84
-        self.observation_space = Box(0.0, 1.0, [1, self.width, self.height], dtype=np.uint8)
+        self.observation_space = Box(0.0, 1.0, [1, self.width, self.height], dtype=np.float16)
 
     def observation(self, frame):
         frame = cv2.cvtColor(frame, cv2.COLOR_RGB2GRAY)
