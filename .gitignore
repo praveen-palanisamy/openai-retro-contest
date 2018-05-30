@@ -16,5 +16,5 @@ core
 #
 *.tar.gz
 *.zip
-
+.idea
 
