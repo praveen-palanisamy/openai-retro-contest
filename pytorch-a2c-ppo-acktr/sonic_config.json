@@ -1,0 +1,78 @@
+{
+    "Spaces": {
+        "observation_channels": 1,
+        "action_shape": 7
+    },
+    "Train": {
+        "0": {
+            "game": "SonicTheHedgehog-Genesis",
+            "level": "SpringYardZone.Act3"
+        },
+        "1": {
+            "game": "SonicTheHedgehog-Genesis",
+            "level": "SpringYardZone.Act2"
+        },
+        "2": {
+            "game": "SonicTheHedgehog-Genesis",
+            "level": "GreenHillZone.Act3"
+        },
+        "3": {
+            "game": "SonicTheHedgehog-Genesis",
+            "level": "GreenHillZone.Act1"
+        },
+        "4": {
+            "game": "SonicTheHedgehog-Genesis",
+            "level": "StarLightZone.Act2"
+        },
+        "5": {
+            "game": "SonicTheHedgehog-Genesis",
+            "level": "StarLightZone.Act1"
+        },
+        "6": {
+            "game": "SonicTheHedgehog-Genesis",
+            "level": "MarbleZone.Act2"
+        },
+        "7": {
+            "game": "SonicTheHedgehog-Genesis",
+            "level": "MarbleZone.Act1"
+        },
+        "8": {
+            "game": "SonicTheHedgehog-Genesis",
+            "level": "MarbleZone.Act3"
+        },
+        "9": {
+            "game": "SonicTheHedgehog-Genesis",
+            "level": "ScrapBrainZone.Act2"
+        },
+        "10": {
+            "game": "SonicTheHedgehog-Genesis",
+            "level": "LabyrinthZone.Act2"
+        },
+        "11": {
+            "game": "SonicTheHedgehog-Genesis",
+            "level": "LabyrinthZone.Act1"
+        },
+        "12": {
+            "game": "SonicTheHedgehog-Genesis",
+            "level": "LabyrinthZone.Act3"
+        }
+    },
+    "Test": {
+        "0": {
+            "game": "SonicTheHedgehog-Genesis",
+            "level": "SpringYardZone.Act1"
+        },
+        "1": {
+            "game": "SonicTheHedgehog-Genesis",
+            "level": "GreenHillZone.Act2"
+        },
+        "2": {
+            "game": "SonicTheHedgehog-Genesis",
+            "level": "StarLightZone.Act3"
+        },
+        "3": {
+            "game": "SonicTheHedgehog-Genesis",
+            "level": "ScrapBrainZone.Act1"
+        }
+    }
+}

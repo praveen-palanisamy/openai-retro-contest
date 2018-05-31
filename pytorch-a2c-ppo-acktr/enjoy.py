@@ -29,12 +29,12 @@ parser.add_argument("--retro-contest", action="store_true", default=False,
 args = parser.parse_args()
 
 if args.retro_contest:
-    env = make_local_env(game='SonicTheHedgehog-Genesis', state='LabyrinthZone.Act1',stack=False, scale_rew =False)
+    env = make_local_env(game='SonicTheHedgehog-Genesis', state='GreenHillZone.Act1',stack=False, scale_rew =False)
 else:
     env = make_env(args.env_name, args.seed, 0, None, args.add_timestep)
     env = DummyVecEnv([env])
 
-actor_critic, ob_rms = \
+actor_critic, ob_rms, saved_rew = \
             torch.load(os.path.join(args.load_dir, args.env_name + ".pt"))
 
 
@@ -72,8 +72,8 @@ def update_current_obs(obs):
     current_obs[:, -shape_dim0:] = obs
 
 
-render_func('human')
 obs = env.reset()
+render_func('human')
 update_current_obs(obs)
 
 if args.env_name.find('Bullet') > -1:
@@ -83,16 +83,18 @@ if args.env_name.find('Bullet') > -1:
     for i in range(p.getNumBodies()):
         if (p.getBodyInfo(i)[0].decode() == "torso"):
             torsoId = i
-
+cum_reward = 0
 while True:
     with torch.no_grad():
         value, action, _, states = actor_critic.act(current_obs,
                                                     states,
                                                     masks,
                                                     deterministic=True)
-    cpu_actions = action.squeeze(1).cpu().numpy()
+    cpu_actions = action.squeeze(1).cpu().numpy()[0]
     # Obser reward and next obs
     obs, reward, done, _ = env.step(cpu_actions)
+    cum_reward += reward
+    print("cum_reward:", cum_reward)
 
     masks.fill_(0.0 if done else 1.0)
 
