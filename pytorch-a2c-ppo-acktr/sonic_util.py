@@ -34,7 +34,7 @@ def make_env(stack=True, scale_rew=True):
     return env
 
 
-def make_local_env(game, state, stack=True, scale_rew=True):
+def make_local_env(game, state, stack=True, scale_rew=False):
     """
     Create an instance of a local Gym environment with some standard wrappers
     """
@@ -48,6 +48,7 @@ def make_local_env(game, state, stack=True, scale_rew=True):
     #    env = FrameStack(env, 4)
     env = CustomWarpFrame(env)
     env = NormalizedEnv(env)
+    env = AllowBacktracking(env)
     return env
 
 
