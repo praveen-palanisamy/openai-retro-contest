@@ -80,13 +80,13 @@ def main():
 
     obs_shape = envs.observation_space.shape
     obs_shape = (obs_shape[0] * args.num_stack, *obs_shape[1:])
-    prev_saved_rew_mean = float('-inf')
+    prev_saved_rew_median = float('-inf')
     actor_critic = Policy(obs_shape, envs.action_space, args.recurrent_policy)
     if args.load_model:
         model_path = os.path.join(args.save_dir, args.algo, args.env_name) + ".pt"
-        actor_critic, ob_rms, prev_saved_rew_mean = torch.load(model_path)
-        print("Loaded actor_critic model from:", model_path, "which got a mean score of:", prev_saved_rew_mean)
-    
+        actor_critic, ob_rms, prev_saved_rew_median= torch.load(model_path)
+        print("Loaded actor_critic model from:", model_path, "which got a median score of:", prev_saved_rew_median)
+
     if envs.action_space.__class__.__name__ == "Discrete":
         action_shape = 1
     else:
@@ -132,6 +132,8 @@ def main():
         current_obs = current_obs.cuda()
         rollouts.cuda()
 
+    prev_reward = 0.0
+    steps_at_same_spot = 0
     start = time.time()
     for j in range(num_updates):
         for step in range(args.num_steps):
@@ -147,6 +149,11 @@ def main():
             obs, reward, done, info = envs.step(cpu_actions)
             reward = torch.from_numpy(np.expand_dims(np.stack(reward), 1)).float()
             episode_rewards += reward
+
+            # Reset env if Sonic gets stuck in place
+            if reward == prev_reward:
+                steps_at_same_spot += 1
+
 
             # If done then clean the history of observations.
             masks = torch.FloatTensor([[0.0] if done_ else [1.0] for done_ in done])
@@ -176,7 +183,7 @@ def main():
         
         rollouts.after_update()
 
-        if j % args.save_interval == 0 and final_rewards.mean() > prev_saved_rew_mean and args.save_dir != "":
+        if j % args.save_interval == 0 and final_rewards.median() > prev_saved_rew_median and args.save_dir != "":
             save_path = os.path.join(args.save_dir, args.algo)
             try:
                 os.makedirs(save_path)
@@ -190,10 +197,14 @@ def main():
 
             save_model = [save_model,
                             hasattr(envs, 'ob_rms') and envs.ob_rms or None,
-                          final_rewards.mean()]
+                          final_rewards.median()]
 
             torch.save(save_model, os.path.join(save_path, args.env_name + ".pt"))
-            prev_saved_rew_mean = final_rewards.mean()
+            prev_saved_rew_median= final_rewards.median()
+            # Save a separate copy just in case the main saved model ends up being worser.
+            # Helps to have a few saved models to choose from at test/runtime
+            torch.save(save_model, os.path.join(save_path, args.env_name + str(final_rewards.median() + '.pt')))
+
 
         if j % args.log_interval == 0:
             end = time.time()
