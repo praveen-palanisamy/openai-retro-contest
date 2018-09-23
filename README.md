@@ -1,4 +1,4 @@
-## Experiments done for the retro contest
+## Deep RL Experiments for transfer-learning/retro contest
 
 ![openai-retro-contest-praveenp](http://praveenp.com/projects/rsc/imgs/openai-retro-contest-intro.gif)
 
