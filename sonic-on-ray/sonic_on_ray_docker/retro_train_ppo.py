@@ -59,7 +59,8 @@ def main():
         alg.restore(args.load_checkpoint)
         print("Restored state from checkpoint:", args.load_checkpoint)
 
-    for i in range(10):
+    #for i in range(10):
+    while True:
         try:
             print("Starting to train")
             result = alg.train()

@@ -133,7 +133,6 @@ def main():
         rollouts.cuda()
 
     prev_reward = 0.0
-    steps_at_same_spot = 0
     start = time.time()
     for j in range(num_updates):
         for step in range(args.num_steps):
@@ -149,10 +148,6 @@ def main():
             obs, reward, done, info = envs.step(cpu_actions)
             reward = torch.from_numpy(np.expand_dims(np.stack(reward), 1)).float()
             episode_rewards += reward
-
-            # Reset env if Sonic gets stuck in place
-            if reward == prev_reward:
-                steps_at_same_spot += 1
 
 
             # If done then clean the history of observations.
@@ -203,7 +198,8 @@ def main():
             prev_saved_rew_median= final_rewards.median()
             # Save a separate copy just in case the main saved model ends up being worser.
             # Helps to have a few saved models to choose from at test/runtime
-            torch.save(save_model, os.path.join(save_path, args.env_name + str(final_rewards.median() + '.pt')))
+            torch.save(save_model, os.path.join(save_path, args.env_name + str(final_rewards.median()) + '.pt'))
+            print("Saved the state which got a median reward of", prev_saved_rew_median)
 
 
         if j % args.log_interval == 0:

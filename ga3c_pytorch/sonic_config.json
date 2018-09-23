@@ -60,17 +60,21 @@
     "Test": {
         "0": {
             "game": "SonicTheHedgehog-Genesis",
-            "level": "SpringYardZone.Act1"
+            "level": "GreenHillZone.Act1"
         },
         "1": {
             "game": "SonicTheHedgehog-Genesis",
-            "level": "GreenHillZone.Act2"
+            "level": "SpringYardZone.Act1"
         },
         "2": {
             "game": "SonicTheHedgehog-Genesis",
-            "level": "StarLightZone.Act3"
+            "level": "GreenHillZone.Act2"
         },
         "3": {
+            "game": "SonicTheHedgehog-Genesis",
+            "level": "StarLightZone.Act3"
+        },
+        "4": {
             "game": "SonicTheHedgehog-Genesis",
             "level": "ScrapBrainZone.Act1"
         }

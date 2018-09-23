@@ -39,7 +39,7 @@ But, having **at least one ring** all/most of the time is a good strategy becaus
 
 ### 2. Description of existing experiments 
 
-- ####Behavior cloning
+- #### Behavior cloning
 
 The `behavior-cloning` folder contains the `keyboard_control_sonic.py` script to collect demonstrations using the keyboard keys, convert them into the action space for the Sonic env and records the demonstrations in `*.bk2` files which can be played back using the playback script by stepping through the states and actions in the `*.bk2` file. This can be used to 
 
@@ -48,7 +48,7 @@ The `behavior-cloning` folder contains the `keyboard_control_sonic.py` script to
 
 The `*.bk2` files can also be used to generate `*.mp4` videos of the screen to see how Sonic plays.
 
-- ####Sonic on Ray
+- #### Sonic on Ray
 
 The `sonic-on-ray` folder was inherited from `openai/sonic-on-ray` project. The `sonic-on-ray/sonic_on_ray_docker` folder contains `retro_train_ppo.py` which is docker-ready along with the modified version of `sonic-on-ray/sonic_on_ray_docker/sonic_on_ray/sonic_on_ray.py` which uses gym remote env or a retro_contest local environment based on the argument (`--local`) passed to `sonic-on-ray/sonic_on_ray_docker/retro_train_ppo.py`
 
@@ -66,13 +66,25 @@ GPU Accelerated A3C implementation in Pytorch
 sudo docker run --runtime nvidia  -v `pwd`/trained_models:/root/compo/trained_models -v `pwd`/tmp:/root/compo/logs  local/retro_ga3c_pytorch:v1
 ```
 
+- #### PPO (+ A2C, ACKTR)
 
+  (Currently on the 	`pytorch_ppo_a2c_acktr` branch)
+
+`experiments/pytorch-a2c--ppo-acktr`
+
+Run the training script using:
+
+`python main.py --retro-contest --num-processes 1500  --env-name "Sonic-GHZA1" --algo "ppo" --use-gae --lr 1e-4 --clip-param 0.1 --value-loss-coef 1 --num-mini-batch 16 --num-frames 200000000 --sonic-config-file sonic_GHZA1.json --ppo-epoch 8`
+
+To-Do:
+
+- [ ] Document the code usage and implementation details
 
 ### 3. Utilities
 
 - `utils/generate_train_test_conf.py` : Generates a `sonic_config.json` file from `sonic-train.csv` and `sonic-validation.csv`. This facilitates random/ordered/curriculum-based training scripts.
 
-###4. Tips & Tricks & Issue resolution 
+### 4. Tips & Tricks & Issue resolution 
 
  1. **Issue:**`RuntimeError: Cannot create multiple emulator instances per process`. This makes it difficult to shuffle the environment/levels for each episode i.e  run episodes from different game levels (Without running one environment instance per actor on separate processes)
 
