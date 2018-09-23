@@ -1,0 +1,32 @@
+FROM openai/retro-agent:tensorflow
+
+# Needed for OpenCV.
+RUN apt-get update && \
+    apt-get install -y libgtk2.0-dev python3-dev zlib1g-dev libsnappy-dev && \
+    rm -rf /var/lib/apt/lists/*
+
+# Baselines has some unneeded and cumbersome dependencies,
+# so we manually fetch the deps we need.
+RUN . ~/venv/bin/activate && \
+    pip install scipy tqdm joblib zmq dill progressbar2 cloudpickle opencv-python cmake && \
+    pip install --no-deps git+https://github.com/openai/baselines.git && \
+    git clone --recursive https://github.com/openai/retro.git gym-retro && \
+    cd gym-retro && \
+    pip install -e . && \
+    cd ..   && \
+    git clone --recursive https://github.com/openai/retro-contest.git && \
+    pip install -e "retro-contest/support[docker]" && \
+    pip install tf-nightly-gpu
+
+# Use the anyrl open source RL framework.
+RUN . ~/venv/bin/activate && \
+    pip install anyrl==0.11.17
+
+ADD rainbow_agent.py ./agent.py
+ADD sonic_util.py .
+COPY Sonic.tar.gz .
+
+RUN tar -xzf Sonic.tar.gz -C  /root/compo/gym-retro/data/ && \
+    rm Sonic.tar.gz
+
+CMD ["python", "-u", "/root/compo/agent.py"]
