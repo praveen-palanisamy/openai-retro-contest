@@ -1,10 +1,16 @@
-##Experiments for the retro contest
+## Experiments done for the retro contest
+
+![openai-retro-contest-praveenp](http://praveenp.com/projects/rsc/imgs/openai-retro-contest-intro.gif)
+
+The experiments are steps towards developing Deep Reinforcement Algorithms that have the ability to generalize to new scenarios based on previous experiences. This is a first step toward making the "test set" different from the "training set" in Reinforcement Learning.
 
 ### 0. Intro/writeup/motiv
 
 Sonic is a side-scrolling 2D video game and for the most part, the character moves from left to right to make progress. The agent observes the game-play action from a side-view camera angle.
 
-Each timestep advances the game by 4 frames, and**State/Observation Space**:  "Each observation is the pixels on the screen for the current frame, a shape `[224, 320, 3]` array of uint8 values"
+Each timestep advances the game by 4 frames,
+
+**State/Observation Space**:  "Each observation is the pixels on the screen for the current frame, a shape `[224, 320, 3]` array of uint8 values"
 
 **Action Space:** "Each action is which buttons to hold down until the next frame (a shape `[12]` array of bool values, one for each button on the Genesis controller where invalid button combinations (`Up+Down` or accessing the start menu) are ignored."
 
@@ -28,14 +34,14 @@ But, having **at least one ring** all/most of the time is a good strategy becaus
 
 ====================
 
-### 1. Ideas/Experiments-to-do
+### 1. Ideas/Experiments
 
 * Joint training
-  * Randomly select levels from a Game on every episode, train & test on validation levels
+  - [x] Randomly select levels from a Game on every episode, train & test on validation levels
 * Curriculum Learning:
-  * Sequentially train on levels on a Game while revisiting the previously trained levels
+  - [x] Sequentially train on levels on a Game while revisiting the previously trained levels
 * Sequential training:
-  * Sequentially train on levels in a game
+  - [x] Sequentially train on levels in a game
 
 ### 2. Description of existing experiments 
 
@@ -48,27 +54,28 @@ The `behavior-cloning` folder contains the `keyboard_control_sonic.py` script to
 
 The `*.bk2` files can also be used to generate `*.mp4` videos of the screen to see how Sonic plays.
 
-- #### Sonic on Ray
+- #### Sonic on Ray : Distributed training at scale
 
 The `sonic-on-ray` folder was inherited from `openai/sonic-on-ray` project. The `sonic-on-ray/sonic_on_ray_docker` folder contains `retro_train_ppo.py` which is docker-ready along with the modified version of `sonic-on-ray/sonic_on_ray_docker/sonic_on_ray/sonic_on_ray.py` which uses gym remote env or a retro_contest local environment based on the argument (`--local`) passed to `sonic-on-ray/sonic_on_ray_docker/retro_train_ppo.py`
 
 The `retro_train_ppo.py` also takes the `--save-dir` and `--load-checkpoint` arguments to save to and load from checkpoints.
 
-- #### GA3C Pytorch
+- #### GA3C Pytorch: GPU Accelerated A3C implementation in Pytorch
 
-`experiments/ga3c_pytorch`
-
-GPU Accelerated A3C implementation in Pytorch
+ The `experiments/ga3c_pytorch` folder contains necessary code for training and testing the GPU accelerated Asynchronous Advantage Actor-Critic agent implemented in PyTorch.
 
 `sudo docker build -f Dockerfile -t local/retro_ga3c_pytorch:v1 .`
 
 ```bash
 sudo docker run --runtime nvidia  -v `pwd`/trained_models:/root/compo/trained_models -v `pwd`/tmp:/root/compo/logs  local/retro_ga3c_pytorch:v1
 ```
+To-Do:
+
+- [ ] Document the code usage and implementation details
 
 - #### PPO (+ A2C, ACKTR)
 
-  (Currently on the 	`pytorch_ppo_a2c_acktr` branch)
+  (Currently on the 	`pytorch_ppo_a2c_acktr` branch based on [this implementation](https://github.com/ikostrikov/pytorch-a2c-ppo-acktr) )
 
 `experiments/pytorch-a2c--ppo-acktr`
 
@@ -76,9 +83,7 @@ Run the training script using:
 
 `python main.py --retro-contest --num-processes 1500  --env-name "Sonic-GHZA1" --algo "ppo" --use-gae --lr 1e-4 --clip-param 0.1 --value-loss-coef 1 --num-mini-batch 16 --num-frames 200000000 --sonic-config-file sonic_GHZA1.json --ppo-epoch 8`
 
-To-Do:
 
-- [ ] Document the code usage and implementation details
 
 ### 3. Utilities
 
@@ -99,4 +104,17 @@ To-Do:
   ```
   Setting `scenari='contest'` while making the environment will create the environment with the json configuration that is used for the retro-contest and will provide a reward for change in `x`. Some of the environment wrappers (eg.: AllowBacktracking) are written assuming such a reward from the environment. If the `scenario='contest'` is left out, the reward from the environment will be same as the game's score.
 
+### 5. Citing
 
+If you use the code in this repository in whole or in parts for your work, please cite:
+
+```bibtex
+@misc{PraveenpRetroTransferLearning,
+  author = {Palanisamy, Praveen},
+  title = {OpenAI Retro Contest Experiments},
+  year = {2018},
+  publisher = {GitHub},
+  journal = {GitHub repository},
+  howpublished = {\url{https://github.com/praveen-palanisamy/openai-retro-contest}},
+}
+```
