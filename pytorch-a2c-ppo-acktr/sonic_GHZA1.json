@@ -1,0 +1,18 @@
+{
+    "Spaces": {
+        "observation_channels": 1,
+        "action_shape": 7
+    },
+    "Train": {
+        "0": {
+            "game": "SonicTheHedgehog-Genesis",
+            "level": "GreenHillZone.Act1"
+        }
+    },
+    "Test": {
+        "0": {
+            "game": "SonicTheHedgehog-Genesis",
+            "level": "GreenHillZone.Act1"
+        }
+    }
+}
